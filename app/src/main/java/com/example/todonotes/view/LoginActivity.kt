@@ -1,14 +1,15 @@
-package com.example.todonotes
+package com.example.todonotes.view
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.example.todonotes.utils.AppConstant
+import com.example.todonotes.R
 
 class LoginActivity : AppCompatActivity() {
 
@@ -34,8 +35,8 @@ class LoginActivity : AppCompatActivity() {
 
                     var intent: Intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
-
                     saveLoginStatus(full_name, user_name)
+                    finish()
                 } else {
                     Toast.makeText(applicationContext,"Enter username",Toast.LENGTH_SHORT).show()
                 }

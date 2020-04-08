@@ -1,4 +1,4 @@
-package com.example.todonotes;
+package com.example.todonotes.utils;
 
 import android.view.ViewGroup;
 

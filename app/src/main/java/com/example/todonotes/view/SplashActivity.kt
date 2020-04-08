@@ -1,10 +1,12 @@
-package com.example.todonotes
+package com.example.todonotes.view
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.todonotes.utils.AppConstant
+import com.example.todonotes.R
 
 class SplashActivity : AppCompatActivity() {
 
@@ -24,12 +26,14 @@ class SplashActivity : AppCompatActivity() {
 
         if(isLoggedIn){
 
-            var intent:Intent = Intent(this,MainActivity::class.java)
+            var intent:Intent = Intent(this,
+                MainActivity::class.java)
             startActivity(intent)
 
         } else {
 
-            var intent:Intent = Intent(this,LoginActivity::class.java)
+            var intent:Intent = Intent(this,
+                LoginActivity::class.java)
             startActivity(intent)
 
         }

@@ -1,4 +1,4 @@
-package com.example.todonotes
+package com.example.todonotes.utils
 
 class AppConstant {
     companion object {
