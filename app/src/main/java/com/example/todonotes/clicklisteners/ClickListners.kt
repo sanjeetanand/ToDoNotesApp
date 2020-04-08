@@ -1,6 +1,9 @@
 package com.example.todonotes.clicklisteners
 
+import com.example.todonotes.db.Notes
+
 interface ClickListners {
-    fun onClick(notes: com.example.todonotes.db.Notes)
-    fun onUpdate(notes: com.example.todonotes.db.Notes)
+    fun onClick(notes: Notes)
+    fun onUpdate(notes: Notes)
+    fun onDelete(notes: Notes)
 }

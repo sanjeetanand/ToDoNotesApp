@@ -1,6 +1,8 @@
 package com.example.todonotes.view
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -19,10 +21,10 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
+        setTitle()
         addWidgets()
 
         complete.setOnClickListener {
-
             finish()
         }
 
@@ -40,5 +42,11 @@ class DetailActivity : AppCompatActivity() {
         var intent:Intent = intent
         textViewHeading.text = intent.getStringExtra(AppConstant.HEADING)
         textViewDescription.text = intent.getStringExtra(AppConstant.DESCRIPTION)
+    }
+
+    private fun setTitle(){
+        var sp:SharedPreferences = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
+        var title:String = sp.getString(AppConstant.FULL_NAME,"")
+        supportActionBar?.subtitle = "Hi, $title"
     }
 }

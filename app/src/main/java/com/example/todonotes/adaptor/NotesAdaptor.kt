@@ -19,7 +19,7 @@ class NotesAdaptor(list: ArrayList<com.example.todonotes.db.Notes>, clickListner
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var textViewHeading:TextView = itemView.findViewById(R.id.textViewHeading)
         var textViewDescription:TextView = itemView.findViewById(R.id.textViewDescription)
-        //var checkBoxMarkStatus:CheckBox = itemView.findViewById(R.id.checkBoxMarkStatus)
+        var btnDelete:FloatingActionButton = itemView.findViewById(R.id.btnDelete)
         var tickBox:FloatingActionButton = itemView.findViewById(R.id.tickBox)
     }
 
@@ -36,7 +36,6 @@ class NotesAdaptor(list: ArrayList<com.example.todonotes.db.Notes>, clickListner
         var notes:Notes = notesList[position]
         holder.textViewHeading.text = notes.heading
         holder.textViewDescription.text = notes.description
-        //holder.checkBoxMarkStatus.isChecked = notes.status
         if(notes.status){
             holder.tickBox.backgroundTintList = ColorStateList.valueOf(0xFFB50373.toInt())
         } else {
@@ -58,18 +57,8 @@ class NotesAdaptor(list: ArrayList<com.example.todonotes.db.Notes>, clickListner
             //holder.checkBoxMarkStatus.isChecked = notes.status
             clickListners.onUpdate(notes)
         }
-
-        /*holder.checkBoxMarkStatus.setOnCheckedChangeListener(object :  CompoundButton.OnCheckedChangeListener {
-            override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-                notes.status = isChecked
-                if(notes.status){
-                    holder.tickBox.backgroundTintList = ColorStateList.valueOf(0xFFB50373.toInt())
-                } else {
-                    holder.tickBox.backgroundTintList = ColorStateList.valueOf(0xFF120D0D.toInt())
-                }
-                clickListners.onUpdate(notes)
-            }
-
-        })*/
+        holder.btnDelete.setOnClickListener{
+            clickListners.onDelete(notes)
+        }
     }
 }

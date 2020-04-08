@@ -50,7 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setTitle(){
-        supportActionBar?.title = sp.getString(AppConstant.FULL_NAME,"")
+        var title:String = sp.getString(AppConstant.FULL_NAME,"")
+        supportActionBar?.subtitle = "Hi, $title"
     }
 
     private fun getDataFromDatabase() {
@@ -66,13 +67,20 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra(AppConstant.HEADING, notes.heading)
                 intent.putExtra(AppConstant.DESCRIPTION, notes.description)
                 startActivity(intent)
-                Log.d("DetailActivity","Finished")
             }
 
             override fun onUpdate(notes: Notes) {
                 val notesApp = applicationContext as NotesApp
                 val notesDao = notesApp.getNotesDb().notesDao()
                 notesDao.updateNotes(notes)
+            }
+
+            override fun onDelete(notes: Notes) {
+                val notesApp = applicationContext as NotesApp
+                val notesDao = notesApp.getNotesDb().notesDao()
+                notesDao.delete(notes)
+                notesList.remove(notes)
+                setUpRecyclerView()
             }
         }
 

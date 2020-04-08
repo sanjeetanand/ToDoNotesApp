@@ -21,8 +21,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            app:layout_constraintEnd_toStartOf="@+id/tickBox"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintStart_toEndOf="@+id/tickBox"
             app:layout_constraintTop_toTopOf="parent"
             />
 <!--            app:layout_constraintStart_toEndOf="@id/checkBoxMarkStatus"-->
@@ -56,9 +56,22 @@
             android:layout_height="wrap_content"
             android:id="@+id/tickBox"
             android:src="@drawable/tick_mark"
-            app:layout_constraintBottom_toBottomOf="@+id/textViewDescription"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/textViewHeading"/>
+            android:layout_marginStart="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/textViewDescription"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/textViewHeading" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnDelete"
+            android:src="@drawable/delete"
+            app:backgroundTint="#FFFFFF"
+            app:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/textViewDescription"
+            app:layout_constraintStart_toEndOf="@id/textViewDescription"
+            app:layout_constraintTop_toTopOf="@id/textViewHeading"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
