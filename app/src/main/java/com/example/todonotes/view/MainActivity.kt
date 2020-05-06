@@ -1,26 +1,28 @@
 package com.example.todonotes.view
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import android.view.Menu
+import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.Constraints
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.example.todonotes.NotesApp
 import com.example.todonotes.utils.AppConstant
 import com.example.todonotes.R
 import com.example.todonotes.adaptor.NotesAdaptor
-import com.example.todonotes.clicklisteners.ClickListners
+import com.example.todonotes.clicklisteners.ClickListeners
 import com.example.todonotes.db.Notes
+import com.example.todonotes.workmanager.MyWorker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,24 +35,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        addWidgets()
+        bindViews()
+        setUpSharedPref()
         setTitle()
         getDataFromDatabase()
-
-        addNotes.setOnClickListener {
-            viewAddNotesDialog()
-        }
+        clickListeners()
         setUpRecyclerView()
+        setUpWorkManager()
     }
 
-    private fun addWidgets(){
+    private fun bindViews(){
         addNotes = findViewById(R.id.addNotes)
         recyclerView = findViewById(R.id.recyclerView)
+    }
+
+    private fun setUpSharedPref(){
         sp = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
     }
 
     private fun setTitle(){
-        var title:String = sp.getString(AppConstant.FULL_NAME,"")
+        var title:String? = sp.getString(AppConstant.FULL_NAME,"")
         supportActionBar?.subtitle = "Hi, $title"
     }
 
@@ -60,12 +64,21 @@ class MainActivity : AppCompatActivity() {
         notesList.addAll(notesDao.getAll())
     }
 
+    private fun clickListeners(){
+        addNotes.setOnClickListener {
+            var intent:Intent = Intent(this@MainActivity,AddNotesActivity::class.java)
+            startActivityForResult(intent,AppConstant.CODE_ACTIVITY)
+        }
+    }
+
     private fun setUpRecyclerView() {
-        var clickListners: ClickListners = object : ClickListners {
+        var clickListeners: ClickListeners = object : ClickListeners {
+
             override fun onClick(notes: Notes) {
-                var intent:Intent = Intent(applicationContext, DetailActivity::class.java)
+                var intent:Intent = Intent(this@MainActivity, DetailActivity::class.java)
                 intent.putExtra(AppConstant.HEADING, notes.heading)
                 intent.putExtra(AppConstant.DESCRIPTION, notes.description)
+                intent.putExtra(AppConstant.IMAGE_PATH,notes.imagePath)
                 startActivity(intent)
             }
 
@@ -74,55 +87,38 @@ class MainActivity : AppCompatActivity() {
                 val notesDao = notesApp.getNotesDb().notesDao()
                 notesDao.updateNotes(notes)
             }
-
-            override fun onDelete(notes: Notes) {
-                val notesApp = applicationContext as NotesApp
-                val notesDao = notesApp.getNotesDb().notesDao()
-                notesDao.delete(notes)
-                notesList.remove(notes)
-                setUpRecyclerView()
-            }
         }
 
-        var adapter:NotesAdaptor = NotesAdaptor(notesList, clickListners)
+        var adapter:NotesAdaptor = NotesAdaptor(notesList, clickListeners)
         var linearLayoutManager:LinearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.orientation = RecyclerView.VERTICAL
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = adapter
     }
 
-    private fun viewAddNotesDialog(){
-        var view:View = LayoutInflater.from(this).inflate(R.layout.dialog_add_notes,null)
+    private fun setUpWorkManager() {
+        val constraint = Constraints.Builder()
+            .build()
+        val request = PeriodicWorkRequest.Builder(MyWorker::class.java, 15, TimeUnit.MINUTES)
+            .setConstraints(constraint)
+            .build()
+        WorkManager.getInstance(this).enqueue(request)
+    }
 
-        var heading:EditText = view.findViewById(R.id.textInputHeading)
-        var description:EditText = view.findViewById(R.id.textInputDescription)
-        var add:Button = view.findViewById(R.id.buttonAdd)
-        var cancel:Button = view.findViewById(R.id.buttonCancel)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == AppConstant.CODE_ACTIVITY){
+            if(resultCode == Activity.RESULT_OK){
+                var heading = data?.getStringExtra(AppConstant.HEADING)
+                var description = data?.getStringExtra(AppConstant.DESCRIPTION)
+                var imagePath = data?.getStringExtra(AppConstant.IMAGE_PATH)
 
-        var dialog:AlertDialog = AlertDialog.Builder(this).setView(view).setCancelable(false).create()
-        dialog.show()
-
-        add.setOnClickListener {
-            var h:String = heading.text.toString()
-            var d:String = description.text.toString()
-            if(h.isNotBlank()){
-                if (d.isNotBlank()){
-                    var n:Notes = Notes(heading = h, description = d)
-
-                    addNotesToDb(n)
-                    notesList.add(n)
-                    setUpRecyclerView()
-                    dialog.hide()
-                } else {
-                    Toast.makeText(this,"Please Enter Description",Toast.LENGTH_SHORT)
-                }
-            } else {
-                Toast.makeText(this,"Please Enter Heading",Toast.LENGTH_SHORT)
+                var notes =
+                    Notes(heading = heading!!, description = description!!, imagePath = imagePath!!)
+                addNotesToDb(notes)
+                notesList.add(notes)
+                recyclerView.adapter?.notifyItemInserted(notesList.size - 1)
             }
-        }
-
-        cancel.setOnClickListener {
-            dialog.hide()
         }
     }
 
@@ -130,5 +126,29 @@ class MainActivity : AppCompatActivity() {
         val notesApp = applicationContext as NotesApp
         val notesDao = notesApp.getNotesDb().notesDao()
         notesDao.insert(notes)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true;
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if(item?.itemId == R.id.blog){
+            val intent = Intent(this, BlogActivity::class.java)
+            startActivity(intent)
+        }else if(item?.itemId == R.id.logout){
+            logout()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun logout() {
+        val editor: SharedPreferences.Editor = sp.edit()
+        editor.putBoolean(AppConstant.IS_LOGGED_IN, false)
+        editor.apply()
+
+        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
     }
 }
