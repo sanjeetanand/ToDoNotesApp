@@ -1,12 +1,9 @@
 package com.example.todonotes.view
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +17,7 @@ import com.example.todonotes.R
 import com.example.todonotes.adaptor.NotesAdaptor
 import com.example.todonotes.clicklisteners.ClickListeners
 import com.example.todonotes.db.Notes
+import com.example.todonotes.utils.StoredSession
 import com.example.todonotes.workmanager.MyWorker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.concurrent.TimeUnit
@@ -28,7 +26,6 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var addNotes:FloatingActionButton
     lateinit var recyclerView: RecyclerView
-    lateinit var sp:SharedPreferences
     var notesList:ArrayList<Notes> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,11 +47,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpSharedPref(){
-        sp = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
+        StoredSession.init(this)
     }
 
     private fun setTitle(){
-        var title:String? = sp.getString(AppConstant.FULL_NAME,"")
+        var title:String? = StoredSession.readString(AppConstant.FULL_NAME)
         supportActionBar?.subtitle = "Hi, $title"
     }
 
@@ -99,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     private fun setUpWorkManager() {
         val constraint = Constraints.Builder()
             .build()
-        val request = PeriodicWorkRequest.Builder(MyWorker::class.java, 15, TimeUnit.MINUTES)
+        val request = PeriodicWorkRequest.Builder(MyWorker::class.java, 1, TimeUnit.DAYS)
             .setConstraints(constraint)
             .build()
         WorkManager.getInstance(this).enqueue(request)
@@ -145,10 +142,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        val editor: SharedPreferences.Editor = sp.edit()
-        editor.putBoolean(AppConstant.IS_LOGGED_IN, false)
-        editor.apply()
-
+        StoredSession.write(AppConstant.IS_LOGGED_IN, false)
         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+        finish()
     }
+
 }

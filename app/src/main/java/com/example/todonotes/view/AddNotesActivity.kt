@@ -1,9 +1,7 @@
 package com.example.todonotes.view
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
@@ -23,6 +21,7 @@ import com.bumptech.glide.Glide
 import com.example.todonotes.BuildConfig
 import com.example.todonotes.R
 import com.example.todonotes.utils.AppConstant
+import com.example.todonotes.utils.StoredSession
 import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.text.SimpleDateFormat
@@ -36,7 +35,6 @@ class AddNotesActivity : AppCompatActivity() {
     lateinit var add:MaterialButton
     lateinit var cancel:MaterialButton
     lateinit var imageView:ImageView
-    lateinit var sp:SharedPreferences
     var picturePath = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +42,7 @@ class AddNotesActivity : AppCompatActivity() {
         setContentView(R.layout.dialog_add_notes)
 
         bindView()
+        setUpSharedPref()
         setTitle()
         clickListeners()
 
@@ -55,11 +54,14 @@ class AddNotesActivity : AppCompatActivity() {
         add = findViewById(R.id.buttonAdd)
         cancel = findViewById(R.id.buttonCancel)
         imageView = findViewById(R.id.imageView)
-        sp = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
+    }
+
+    private fun setUpSharedPref(){
+        StoredSession.init(this)
     }
 
     private fun setTitle(){
-        var title:String? = sp.getString(AppConstant.FULL_NAME,"")
+        var title:String? =StoredSession.readString(AppConstant.FULL_NAME)
         supportActionBar?.subtitle = "Hi, $title"
     }
 

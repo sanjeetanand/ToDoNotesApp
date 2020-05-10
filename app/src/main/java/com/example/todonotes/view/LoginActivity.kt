@@ -1,8 +1,6 @@
 package com.example.todonotes.view
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -10,14 +8,13 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.todonotes.utils.AppConstant
 import com.example.todonotes.R
+import com.example.todonotes.utils.StoredSession
 
 class LoginActivity : AppCompatActivity() {
 
     lateinit var fullNameEditText:EditText
     lateinit var userNameEditText:EditText
     lateinit var login:Button
-    lateinit var sp:SharedPreferences
-    lateinit var editor:SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(applicationContext,"Enter full name",Toast.LENGTH_SHORT).show()
             }
+            finish()
         }
     }
 
@@ -50,15 +48,13 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setUpSharedPref(){
-        sp = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
+        StoredSession.init(this)
     }
 
     private fun saveLoginStatus(fullName:String, userName:String){
-        editor = sp.edit()
-        editor.putBoolean(AppConstant.IS_LOGGED_IN,true)
-        editor.putString(AppConstant.FULL_NAME, fullName)
-        editor.putString(AppConstant.USER_NAME, userName)
-        editor.apply()
+        StoredSession.write(AppConstant.IS_LOGGED_IN,true)
+        StoredSession.write(AppConstant.FULL_NAME,fullName)
+        StoredSession.write(AppConstant.USER_NAME, userName)
     }
 
 

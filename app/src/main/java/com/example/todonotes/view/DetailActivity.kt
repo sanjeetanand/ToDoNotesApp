@@ -10,6 +10,7 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.example.todonotes.utils.AppConstant
 import com.example.todonotes.R
+import com.example.todonotes.utils.StoredSession
 
 class DetailActivity : AppCompatActivity() {
 
@@ -40,8 +41,8 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setTitle(){
-        var sp:SharedPreferences = getSharedPreferences(AppConstant.SP_NAME, Context.MODE_PRIVATE)
-        var title:String? = sp.getString(AppConstant.FULL_NAME,"")
+        StoredSession.init(this)
+        var title:String? = StoredSession.readString(AppConstant.FULL_NAME)
         supportActionBar?.subtitle = "Hi, $title"
     }
 }
